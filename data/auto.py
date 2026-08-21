@@ -44,4 +44,27 @@ auto_values, mu, sigma = hw5.std_y(auto_values)
 #Your code for cross-validation goes here
 #Make sure to scale the RMSE values returned by xval_learning_alg by sigma,
 #as mentioned in the lab, in order to get accurate RMSE values on the dataset
+lambdas_1_2 = np.arange(0.0, 0.11, 0.01)  # [0.0, 0.01, ..., 0.10]
+lambdas_3 = np.arange(0, 201, 20)          # [0, 20, 40, ..., 200]
 
+for config_idx, X in enumerate(auto_data):
+    print(f"\n=================== CONFIG {config_idx + 1} ===================")
+    
+    for order in [1, 2, 3]:
+        poly_fn = hw5.make_polynomial_feature_fun(order)
+        X_poly = poly_fn(X)
+        
+        lambdas = lambdas_3 if order == 3 else lambdas_1_2
+        
+        best_rmse = float('inf')
+        best_lam = None
+        
+        for lam in lambdas:
+            raw_rmse = hw5.xval_learning_alg(X_poly, auto_values, lam, 10)
+            real_rmse = (raw_rmse * sigma).item()  # Mise à l'échelle par sigma
+            
+            if real_rmse < best_rmse:
+                best_rmse = real_rmse
+                best_lam = lam
+                
+        print(f"Degré {order} | Meilleur Lambda = {best_lam} | RMSE: {best_rmse:.4f} mpg")
